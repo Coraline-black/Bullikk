@@ -3,33 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bullik: Sealed Pet</title>
+    <title>Bullik AI: Sealed Pet</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="pet-face-container">
+<div id="box">
     <div id="pet-face">
         <div class="ears">
             <div class="ear left"></div>
             <div class="ear right"></div>
         </div>
-        <div class="face-elements">
+        <div class="face-grid">
             <div class="eyes-row">
                 <div class="eye left-eye"></div>
                 <div class="eye right-eye"></div>
             </div>
-            <div class="mouth-box">
-                <div class="cat-mouth"></div>
-            </div>
+            <div class="nose"></div>
+            <div class="mouth"></div>
         </div>
     </div>
 </div>
 
-<div id="debug-info"></div> <video id="webcam-feed" autoplay playsinline style="display: none;"></video>
-<canvas id="face-canvas" style="display: none;"></canvas>
+<div id="subtitles">...</div>
 
+<video id="webcam" autoplay muted playsinline style="display:none;"></video>
+<script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
 <script src="script.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </body>
 </html>

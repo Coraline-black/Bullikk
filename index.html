@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bullik AI: Final</title>
+    <title>Bullik AI Pet</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="screen-box">
-    <div id="pet-container">
+<div id="container">
+    <div id="bullik">
         <div class="ears">
-            <div class="ear left"></div>
-            <div class="ear right"></div>
+            <div class="ear"></div>
+            <div class="ear"></div>
         </div>
-        <div id="face">
-            <div class="eyes-row">
-                <div class="eye left-eye"></div>
-                <div class="eye right-eye"></div>
+        <div class="face">
+            <div class="eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
             </div>
             <div class="nose"></div>
             <div class="mouth"></div>
@@ -25,9 +25,9 @@
     </div>
 </div>
 
-<div id="ai-status">* Инициализация систем... *</div>
+<div id="ai-log">* Пробуждение... *</div>
 
-<video id="webcam" autoplay muted playsinline style="display:none;"></video>
+<video id="video" autoplay muted playsinline style="display:none;"></video>
 
 <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
 <script src="script.js"></script>

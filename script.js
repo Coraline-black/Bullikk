@@ -1,115 +1,134 @@
+// Настройки твоего проекта
+const WORKER_URL = "https://bullik.damp-glade-283e.workers.dev";
 const pet = document.getElementById('pet-box');
+const overlay = document.getElementById('overlay');
 const eyes = document.querySelectorAll('.eye');
-const video = document.getElementById('webcam'); // Предполагаем наличие в HTML
 
-// Настройки твоего Cloudflare
-const CF_ID = "ТВОЙ_ACCOUNT_ID"; 
-const CF_TOKEN = "ТВОЙ_API_TOKEN";
+let isInitialCenter = true; // Флаг для удержания в центре при старте
 
-let stats = {
-    isOwner: false,
-    mood: 'idle',
-    isThinking: false
+// 1. Пробуждение по клику
+overlay.onclick = () => {
+    overlay.style.display = 'none';
+    startLife();
 };
 
-// 1. Инициализация при загрузке
-window.onload = () => {
-    console.log("Буллик готов к пробуждению в центре.");
-    // Начинаем слежение через 3 секунды
-    setTimeout(startHybridAI, 3000);
-};
-
-// 2. Интеграция с Cloudflare Workers AI
-async function askAI(message) {
-    stats.isThinking = true;
+async function startLife() {
     try {
-        const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CF_ID}/ai/run/@cf/meta/llama-3-8b-instruct`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${CF_TOKEN}` },
-            body: JSON.stringify({ 
-                prompt: `Ты — Буллик, гибрид собаки и кота. Ты преданный как пес и независимый как кот. Отвечай коротко: ${message}` 
-            })
+        // Подключаем зрение (FaceAPI)
+        await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/vladmandic/face-api/master/model/');
+        
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "user" }, 
+            audio: true 
         });
-        const data = await response.json();
-        return data.result.response;
+        
+        const video = document.createElement('video');
+        video.id = 'webcam';
+        video.srcObject = stream;
+        video.muted = true;
+        video.playsInline = true;
+        video.play();
+
+        // Запускаем циклы жизни
+        trackFace(video);
+        initSpeech();
+        console.log("Буллик-гибрид успешно запущен!");
     } catch (err) {
-        return "Мрр-гав? (Связь потеряна)";
-    } finally {
-        stats.isThinking = false;
+        console.error("Ошибка запуска:", err);
     }
 }
 
-// 3. Зрение и Движение (Собачья преданность)
-async function startHybridAI() {
-    // Подгрузка FaceAPI (предполагаем наличие библиотеки)
-    await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/vladmandic/face-api/master/model/');
-    
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
+// 2. Зрение (Слежение собаки + Лень кота)
+async function trackFace(video) {
+    const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
 
-    setInterval(async () => {
-        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
+    if (detections) {
+        isInitialCenter = false; // Как только увидел тебя — начал движение
+        const box = detections.box;
         
-        if (detections.length > 0) {
-            // Ведет себя как пес: следует за тобой
-            const box = detections[0].box;
-            const x = (box.x / video.videoWidth) * window.innerWidth;
-            const y = (box.y / video.videoHeight) * window.innerHeight;
-            
-            pet.style.left = `${x}px`;
-            pet.style.top = `${y}px`;
-            setMood('idle');
-        } else {
-            // Ведет себя как кот: уходит в "свои дела" (дрейф)
-            if (Math.random() > 0.9) wander();
-        }
-    }, 600);
+        // Инвертируем X, так как камера работает как зеркало
+        const x = (1 - (box.x + box.width / 2) / video.videoWidth) * window.innerWidth;
+        const y = (box.y + box.height / 2) / video.videoHeight * window.innerHeight;
+
+        pet.style.left = `${x}px`;
+        pet.style.top = `${y}px`;
+        setMood('idle');
+    } else {
+        // Кошачье поведение: если хозяина нет, Буллик может лениво переместиться
+        if (!isInitialCenter && Math.random() > 0.99) wander();
+    }
+    
+    requestAnimationFrame(() => trackFace(video));
 }
 
-// 4. Слух (Команды)
-function initHearing() {
-    const Speech = window.webkitSpeechRecognition || window.SpeechRecognition;
-    const rec = new Speech();
-    rec.lang = 'ru-RU';
-    rec.onresult = async (e) => {
-        const text = e.results[0][0].transcript.toLowerCase();
-        if (text.includes("буллик")) {
+// 3. Общение с Cloudflare AI
+async function getAIResponse(userText) {
+    try {
+        const response = await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: userText })
+        });
+        const data = await response.json();
+        // В Cloudflare Workers AI ответ обычно лежит в data.response
+        return data.response || "Мрр-гав?"; 
+    } catch (err) {
+        return "Связь с космосом прервана...";
+    }
+}
+
+// 4. Слух (Speech Recognition)
+function initSpeech() {
+    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Speech) return;
+
+    const recognition = new Speech();
+    recognition.lang = 'ru-RU';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+
+    recognition.onresult = async (event) => {
+        const text = event.results[event.results.length - 1][0].transcript.toLowerCase();
+        
+        if (text.includes("буллик") || text.includes("привет")) {
             setMood('love');
-            const reply = await askAI(text);
-            console.log("Буллик говорит:", reply);
+            console.log("Ты сказал:", text);
+            
+            const reply = await getAIResponse(text);
+            console.log("Буллик ответил:", reply);
+            
+            // Здесь можно добавить озвучку текста (TTS), если нужно
+            setTimeout(() => setMood('idle'), 3000);
         }
     };
-    rec.start();
+
+    recognition.onerror = () => recognition.start(); // Перезапуск при ошибке
+    recognition.onend = () => recognition.start();
+    recognition.start();
 }
 
-// Помощники
-function setMood(m) {
-    eyes.forEach(e => {
-        e.className = 'eye';
-        if (m !== 'idle') e.classList.add(m);
-    });
+// 5. Вспомогательные функции
+function setMood(type) {
+    pet.classList.remove('love', 'blink');
+    if (type !== 'idle') pet.classList.add(type);
 }
 
 function wander() {
-    const tx = Math.random() * (window.innerWidth - 200) + 100;
-    const ty = Math.random() * (window.innerHeight - 200) + 100;
+    const tx = Math.random() * (window.innerWidth - 250) + 125;
+    const ty = Math.random() * (window.innerHeight - 250) + 125;
     pet.style.left = `${tx}px`;
     pet.style.top = `${ty}px`;
 }
 
-// Поглаживание (мурчание)
+// Поглаживание (Мурчание)
 pet.onclick = () => {
-    pet.classList.add('purring');
     setMood('love');
     if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
-    setTimeout(() => {
-        pet.classList.remove('purring');
-        setMood('idle');
-    }, 2000);
+    setTimeout(() => setMood('idle'), 2000);
 };
 
 // Моргание
 setInterval(() => {
-    eyes.forEach(e => e.classList.add('blink'));
-    setTimeout(() => eyes.forEach(e => e.classList.remove('blink')), 150);
-}, 4000);
+    pet.classList.add('blink');
+    setTimeout(() => pet.classList.remove('blink'), 150);
+}, 5000);

@@ -1,211 +1,135 @@
-const textBox = document.querySelector(".text")
-const input = document.getElementById("input")
-const send = document.getElementById("send")
-const mic = document.getElementById("mic")
-const eyes = document.querySelectorAll(".eye")
-const mouth = document.getElementById("mouth")
+let bullik = {
+    energy: 100,
+    hunger: 0,
+    wildness: 10, // Уровень "дикости"
+    mood: "neutral",
+    lastAction: Date.now(),
+    isBiting: false
+};
 
-/* ===== СОСТОЯНИЕ ПИТОМЦА ===== */
+const body = document.getElementById("pet-body");
+const tablet = document.querySelector(".text-content");
+const eyes = document.querySelectorAll(".eye");
 
-let state = JSON.parse(localStorage.getItem("petState")) || {
-mood:60,
-energy:70,
-trust:0,
-ownerKnown:false,
-lastSeen:Date.now(),
-personality:{
-playful:Math.random(),
-lazy:Math.random(),
-brave:Math.random()
-}
-}
+// --- ГОРМОНЫ И ИНСТИНКТЫ ---
+setInterval(() => {
+    // 1. Скука превращается в деструктив
+    if (Date.now() - bullik.lastAction > 30000) {
+        bullik.wildness += 1;
+        if (bullik.wildness > 50) startZoomies();
+    }
+    
+    // 2. Усталость
+    bullik.energy -= 0.1;
+    if (bullik.energy < 10) setFace('sleep');
 
-let memory = JSON.parse(localStorage.getItem("petMemory")) || []
+    updateUI();
+}, 2000);
 
-function save(){
-localStorage.setItem("petState",JSON.stringify(state))
-localStorage.setItem("petMemory",JSON.stringify(memory))
-}
-
-/* ===== ЭМОЦИИ ===== */
-
-function eyesColor(c){
-eyes.forEach(e=>e.style.background=c)
-mouth.style.borderColor=c
-}
-
-function emotion(type){
-
-if(type==="happy"){ eyesColor("#00ffd0"); mouth.style.height="20px" }
-if(type==="love"){ eyesColor("#ff4da6") }
-if(type==="angry"){ eyesColor("#ff3b3b"); mouth.style.height="5px" }
-if(type==="sad"){ eyesColor("#4da6ff") }
-if(type==="sleep"){ eyesColor("#777"); mouth.style.height="0px" }
-if(type==="scared"){ eyesColor("#ffaa00") }
-if(type==="idle"){ eyesColor("#00eaff"); mouth.style.height="18px" }
-
+// --- ДЕЙСТВИЯ ЖИВОТНОГО ---
+function startZoomies() {
+    body.classList.add("zoomies");
+    tablet.textContent = "*носится по комнате и сбивает вазы*";
+    setTimeout(() => body.classList.remove("zoomies"), 3000);
+    bullik.wildness = 5;
 }
 
-/* ===== ПЕЧАТЬ ТЕКСТА ===== */
+function biteAction() {
+    bullik.isBiting = true;
+    body.classList.add("bite");
+    setFace('angry');
+    tablet.textContent = "*КУСЬ!*";
+    
+    // Вибрация телефона (если поддерживается)
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 
-async function speak(text){
-textBox.textContent=""
-for(let l of text){
-textBox.textContent+=l
-await new Promise(r=>setTimeout(r,18))
-}
-}
-
-/* ===== МОЗГ ===== */
-
-async function askAI(msg,voice=false){
-
-state.lastSeen=Date.now()
-
-/* реакция на незнакомца */
-if(!state.ownerKnown){
-emotion("scared")
-await speak("кто ты?..")
-state.ownerKnown=true
-state.trust+=20
-save()
-return
+    setTimeout(() => {
+        body.classList.remove("bite");
+        bullik.isBiting = false;
+        setFace('idle');
+    }, 1000);
 }
 
-/* настроение влияет на эмоцию */
-if(state.mood<20) emotion("sad")
-else emotion("sleep")
+// Поглаживание
+body.onclick = () => {
+    bullik.lastAction = Date.now();
+    if (bullik.wildness > 40) {
+        biteAction(); // Слишком дикий — укусит!
+    } else {
+        bullik.energy += 5;
+        bullik.wildness = Math.max(0, bullik.wildness - 5);
+        setFace('happy');
+        tablet.textContent = "*мурчит и ластится*";
+    }
+};
 
-memory.push({role:"user",content:msg})
-if(memory.length>40) memory=memory.slice(-40)
+// --- ИНТЕЛЛЕКТ ЖИВОТНОГО ---
+async function handleInput(input, isVoice = false) {
+    bullik.lastAction = Date.now();
+    
+    // Животные реагируют на интонацию
+    let prompt = `Ты - домашнее животное по имени Буллик. Твои статы: Энергия ${bullik.energy}, Дикость ${bullik.wildness}.
+    ТЫ НЕ ГОВОРИШЬ КАК ЧЕЛОВЕК. Ты описываешь свои действия в звездочках и издаешь звуки.
+    Если тебя зовут - ты можешь прийти или проигнорировать. 
+    Если на тебя кричат - ты боишься или злишься.
+    Если ты хочешь играть - ты приносишь мячик.`;
 
-save()
+    setFace('hunt');
 
-try{
+    try {
+        const response = await fetch("https://bullik.damp-glade-283e.workers.dev/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: prompt + " Хозяин делает: " + input })
+        });
+        
+        const data = await response.json();
+        let reply = data.answer;
 
-const res = await fetch("https://bullik.damp-glade-283e.workers.dev/",{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({
-message:msg,
-memory,
-mood:state.mood,
-personality:state.personality,
-trust:state.trust
-})
-})
+        // Если это голос, Буллик реагирует активнее
+        if (isVoice) bullik.wildness += 5;
 
-const data = await res.json()
-let answer = data.answer || "мур?"
+        // Случайный "Тупняк"
+        if (Math.random() > 0.8) {
+            tablet.textContent = "*уставился в пустой угол и замер*";
+            setFace('scared');
+        } else {
+            tablet.textContent = reply;
+        }
 
-memory.push({role:"assistant",content:answer})
-
-/* эмоция по смыслу */
-if(answer.match(/люб|рад|обож/)) emotion("love")
-else if(answer.match(/злю|уходи/)) emotion("angry")
-else if(answer.match(/груст|печал/)) emotion("sad")
-else emotion("happy")
-
-await speak(answer)
-
-/* изменения характера */
-state.trust+=2
-state.mood+=3
-state.energy-=2
-
-save()
-
-setTimeout(()=>emotion("idle"),1500)
-
-}catch{
-await speak("я не понял…")
-emotion("sad")
-}
-}
-
-/* ===== КНОПКИ ===== */
-
-send.onclick=()=>{
-if(!input.value.trim()) return
-askAI(input.value)
-input.value=""
+    } catch (e) {
+        biteAction(); // Глючит — кусается!
+    }
 }
 
-input.addEventListener("keydown",e=>{
-if(e.key==="Enter") send.click()
-})
-
-/* голос */
-mic.onclick=()=>{
-
-const Rec = window.SpeechRecognition||window.webkitSpeechRecognition
-if(!Rec){ textBox.textContent="нет микрофона"; return }
-
-const r = new Rec()
-r.lang="ru-RU"
-
-emotion("scared")
-
-r.onresult=e=>{
-askAI(e.results[0][0].transcript,true)
+// --- ВСПОМОГАТЕЛЬНОЕ ---
+function setFace(type) {
+    eyes.forEach(e => {
+        e.className = 'eye';
+        if (type === 'happy') e.style.borderRadius = "50% 50% 10px 10px";
+        if (type === 'hunt') e.classList.add('hunt');
+        if (type === 'sleep') e.style.height = "2px";
+    });
 }
 
-r.start()
+function updateUI() {
+    document.getElementById("energy-val").textContent = Math.floor(bullik.energy);
+    document.getElementById("hunger-val").textContent = Math.floor(bullik.wildness);
 }
 
-/* ===== ПОГЛАДИТЬ ===== */
+document.getElementById("sendBtn").onclick = () => {
+    const val = document.getElementById("textInput").value;
+    handleInput(val, false);
+    document.getElementById("textInput").value = "";
+};
 
-document.getElementById("pet").onclick=()=>{
-state.mood+=10
-state.trust+=5
-emotion("love")
-textBox.textContent="муррр 🤍"
-save()
-setTimeout(()=>emotion("idle"),1000)
-}
-
-/* ===== ЖИЗНЕННЫЙ ЦИКЛ ===== */
-
-setInterval(()=>{
-
-let now = Date.now()
-let absent = (now - state.lastSeen)/1000
-
-state.mood -= 0.5
-state.energy -= 0.3
-
-/* скучает */
-if(absent>60){
-emotion("sad")
-textBox.textContent="где ты?.."
-}
-
-/* спит */
-if(state.energy<=10){
-emotion("sleep")
-textBox.textContent="хррр..."
-}
-
-/* проснулся */
-if(state.energy<40 && Math.random()<0.2){
-state.energy+=30
-emotion("happy")
-textBox.textContent="я проснулся!"
-}
-
-save()
-
-},15000)
-
-/* случайное поведение */
-setInterval(()=>{
-
-let r=Math.random()
-
-if(r<0.2){ emotion("happy") }
-else if(r<0.4){ emotion("sad") }
-else if(r<0.6){ emotion("love") }
-
-},20000)
-
-emotion("idle")
+document.getElementById("micBtn").onclick = function() {
+    this.classList.add("active");
+    const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    rec.lang = 'ru-RU';
+    rec.onresult = (e) => {
+        handleInput(e.results[0][0].transcript, true);
+        this.classList.remove("active");
+    };
+    rec.start();
+};

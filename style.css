@@ -1,113 +1,51 @@
-body{
-margin:0;
-background:#000;
-font-family:sans-serif;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-color:white;
+:root {
+    --bg-color: #0d0d0f;
+    --robot-color: #1e1e1e;
+    --cyan: #00f2ff;
+    --eye-size: 45px;
 }
 
-.scene{
-width:100%;
-max-width:420px;
-display:flex;
-flex-direction:column;
-gap:25px;
-align-items:center;
+body { background: var(--bg-color); color: white; font-family: 'Courier New', monospace; overflow: hidden; }
+
+.scene { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; justify-content: space-between; }
+
+/* Динамика тела */
+.robot-container { 
+    position: relative; 
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    cursor: pointer;
+    user-select: none;
 }
 
-#pet{
-position:relative;
+/* Анимация "Бесится" (Zoomies) */
+@keyframes zoomies {
+    0% { transform: translate(0,0) rotate(0); }
+    20% { transform: translate(50px, -20px) rotate(10deg); }
+    40% { transform: translate(-60px, 30px) rotate(-15deg); }
+    60% { transform: translate(70px, 100px) rotate(20deg); }
+    100% { transform: translate(0,0) rotate(0); }
 }
 
-.ears{
-display:flex;
-justify-content:space-between;
-padding:0 40px;
-}
+.zoomies { animation: zoomies 0.4s infinite !important; }
 
-.ear{
-width:40px;
-height:40px;
-background:#111;
-border-radius:10px 10px 0 0;
-}
+/* Лицо */
+#robot-head { width: 250px; height: 190px; background: var(--robot-color); border-radius: 50px; padding: 10px; border: 3px solid #333; }
+#face { width: 100%; height: 100%; background: #000; border-radius: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
 
-.face{
-background:#050505;
-border-radius:30px;
-padding:40px 30px;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:20px;
-box-shadow:0 0 40px rgba(0,255,255,.2);
-}
+.eye { width: var(--eye-size); height: var(--eye-size); background: var(--cyan); border-radius: 50%; box-shadow: 0 0 20px var(--cyan); transition: 0.1s; }
 
-.eyes{
-display:flex;
-gap:40px;
-}
+/* Зрачки расширяются при охоте/игре */
+.eye.hunt { width: 60px; height: 60px; background: #fff; box-shadow: 0 0 30px #fff; }
 
-.eye{
-width:65px;
-height:65px;
-background:#00eaff;
-border-radius:50%;
-transition:.3s;
-}
+/* Кусание экрана */
+.bite { transform: scale(1.5) rotate(5deg); filter: hue-rotate(90deg); }
 
-#mouth{
-width:40px;
-height:18px;
-border-bottom:4px solid #00eaff;
-border-radius:0 0 30px 30px;
-transition:.3s;
-}
+.cat-mouth { width: 30px; height: 10px; border-bottom: 3px solid var(--cyan); border-radius: 50%; transition: 0.3s; }
 
-.whiskers{
-position:absolute;
-bottom:70px;
-display:flex;
-gap:120px;
-}
+#tablet { width: 90%; min-height: 60px; font-style: italic; color: #888; text-align: center; font-size: 14px; }
 
-.whiskers span{
-display:block;
-width:25px;
-height:3px;
-background:#00eaff;
-margin:6px 0;
-}
-
-#tablet{
-background:#111;
-padding:20px;
-border-radius:20px;
-text-align:center;
-min-height:60px;
-width:100%;
-}
-
-.controls{
-display:flex;
-gap:10px;
-width:100%;
-}
-
-input{
-flex:1;
-padding:12px;
-border-radius:20px;
-border:none;
-outline:none;
-}
-
-button{
-padding:12px 16px;
-border:none;
-border-radius:15px;
-cursor:pointer;
-}
+.controls { width: 100%; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.input-group { width: 100%; display: flex; background: #1a1a1b; border-radius: 30px; padding: 5px; border: 1px solid #333; }
+#textInput { flex: 1; background: none; border: none; color: white; padding: 12px; outline: none; }
+#micBtn { width: 60px; height: 60px; border-radius: 50%; border: none; background: #fff; font-size: 25px; transition: 0.3s; }
+#micBtn.active { background: #ff4d4d; transform: scale(1.2); }

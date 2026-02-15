@@ -1,154 +1,75 @@
 :root {
-    --bg-color: #000000;
-    --neon-color: #00f2ff; /* Основной неоновый цвет */
-    --neon-glow: 0 0 15px var(--neon-color), 0 0 30px var(--neon-color);
-    --ear-outline: #008899; /* Цвет обводки ушей, если нужно */
+    --cyan: #00f2ff;
+    --red: #ff4d4d;
+    --pink: #ff66aa;
+    --yellow: #ffd966;
 }
 
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none; /* Чтобы не выделялся текст */
-}
-
-body {
-    background-color: var(--bg-color);
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
+body, html {
+    margin: 0; padding: 0;
+    background: #000; /* Глубокая черная коробка */
+    width: 100vw; height: 100vh;
     overflow: hidden;
-    display: flex; /* Для центрирования лица, если оно не плавает */
-    justify-content: center;
-    align-items: center;
 }
 
-#pet-face-container {
-    position: absolute; /* Позволяет плавать по всему экрану */
-    width: 250px; /* Размер "головы" */
-    height: 200px;
-    transition: transform 0.5s ease-out; /* Плавное перемещение */
+#box {
+    position: relative;
+    width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
 }
 
 #pet-face {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Ушки */
-.ears {
     position: absolute;
-    top: -30px; /* Поднимаем выше головы */
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 15%; /* Сдвигаем ушки к центру */
+    width: 280px;
+    display: flex; flex-direction: column; align-items: center;
+    /* Центрирование при старте */
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    transition: left 1.5s ease-in-out, top 1.5s ease-in-out, transform 0.3s;
+    cursor: pointer;
 }
 
+.ears { display: flex; gap: 70px; margin-bottom: -15px; }
 .ear {
-    width: 70px;
-    height: 80px;
-    background: transparent; /* Ушки как обводка */
-    border: 3px solid var(--neon-color);
+    width: 75px; height: 95px;
+    background: #000; border: 3px solid var(--cyan);
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    border-radius: 10px;
-    box-shadow: var(--neon-glow);
+    border-radius: 12px;
+    box-shadow: 0 0 15px var(--cyan);
 }
 
-/* Элементы лица внутри головы */
-.face-elements {
-    width: 90%;
-    height: 80%;
-    background: transparent; /* Лицо - это просто элементы на черном фоне */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-}
-
-/* Глаза */
-.eyes-row {
-    display: flex;
-    gap: 40px; /* Расстояние между глазами */
-}
-
+.eyes-row { display: flex; gap: 40px; }
 .eye {
-    width: 60px;
-    height: 60px;
-    background: var(--neon-color);
+    width: 70px; height: 115px;
+    background: var(--cyan);
+    border-radius: 50% 50% 45% 45%;
+    box-shadow: 0 0 35px var(--cyan);
+    transition: all 0.3s ease;
+}
+
+.nose {
+    width: 16px; height: 11px;
+    background: var(--cyan);
     border-radius: 50%;
-    box-shadow: var(--neon-glow);
-    transition: all 0.2s ease-in-out;
+    margin: 15px 0 5px;
+    box-shadow: 0 0 10px var(--cyan);
 }
 
-/* Рот */
-.mouth-box {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.cat-mouth {
-    width: 40px;
-    height: 15px;
-    border-bottom: 4px solid var(--neon-color);
+.mouth {
+    width: 50px; height: 18px;
+    border-bottom: 4px solid var(--cyan);
     border-radius: 0 0 25px 25px;
-    box-shadow: var(--neon-glow);
 }
 
-/* --- ЭМОЦИИ --- */
-
-/* Сон */
-.eye.sleep {
-    height: 5px;
-    border-radius: 5px;
-    background: #005566;
-    box-shadow: none;
+#subtitles {
+    position: absolute; bottom: 40px; width: 100%;
+    text-align: center; color: rgba(0, 242, 255, 0.4);
+    font-family: monospace; font-size: 15px;
+    pointer-events: none;
 }
 
-/* Радость / Любовь */
-.eye.love {
-    background: #ff66aa; /* Розовый неон */
-    box-shadow: 0 0 15px #ff66aa, 0 0 30px #ff66aa;
-    clip-path: path('M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
-    transform: scale(2.5); /* Сердечки крупнее */
-}
-
-/* Злость / Агрессия */
-.eye.angry {
-    background: #ff0000; /* Красный неон */
-    box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000;
-    clip-path: polygon(0% 0%, 100% 0%, 75% 50%, 100% 100%, 0% 100%, 25% 50%); /* Злой прищур */
-    transform: rotate(5deg);
-}
-
-/* Страх */
-.eye.scared {
-    background: #ffff00; /* Желтый неон */
-    box-shadow: 0 0 15px #ffff00, 0 0 30px #ffff00;
-    transform: scale(0.8); /* Глаза сужаются от страха */
-}
-
-/* Охота / Внимание (зрачки расширены) */
-.eye.hunt {
-    width: 80px; /* Глаза сильно расширены */
-    height: 80px;
-    background: var(--neon-color);
-    box-shadow: var(--neon-glow);
-}
-
-/* Отладочная информация (невидима в нормальном режиме) */
-#debug-info {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 10px;
-    z-index: 999;
-}
+/* Эмоции */
+.eye.scared { transform: scale(0.5); background: var(--yellow); box-shadow: 0 0 20px var(--yellow); }
+.eye.love { background: var(--pink); box-shadow: 0 0 35px var(--pink); transform: scale(1.15); }
+.eye.angry { background: var(--red); box-shadow: 0 0 35px var(--red); clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 60%); }
+.eye.blink { transform: scaleY(0.05); }

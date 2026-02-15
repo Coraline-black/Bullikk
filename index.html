@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bullik AI Pet</title>
+    <title>Bullik Hybrid AI</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
 </head>
 <body>
 
 <div id="app">
-    <div id="pet">
+    <div id="pet-box">
         <div class="ears">
             <div class="ear"></div>
             <div class="ear"></div>
         </div>
         <div class="face">
             <div class="eyes">
-                <div class="eye" id="eye-l"></div>
-                <div class="eye" id="eye-r"></div>
+                <div class="eye"></div>
+                <div class="eye"></div>
             </div>
             <div class="nose"></div>
             <div class="mouth"></div>
@@ -26,10 +26,14 @@
     </div>
 </div>
 
-<div id="overlay">Нажми на экран, чтобы разбудить Буллика</div>
-<div id="logger">Система: Ожидание...</div>
+<div id="overlay">
+    <p>Нажми на экран, чтобы разбудить Буллика</p>
+</div>
 
-<video id="video" autoplay muted playsinline style="position:fixed; opacity:0; pointer-events:none;"></video>
+<div id="status-log">Система: Ожидание...</div>
+
+<video id="webcam" autoplay muted playsinline style="display:none;"></video>
+
 <script src="script.js"></script>
 </body>
 </html>

@@ -1,75 +1,70 @@
 :root {
-    --cyan: #00f2ff;
-    --red: #ff4d4d;
-    --pink: #ff66aa;
-    --yellow: #ffd966;
+    --led: #00f2ff;
+    --scared: #ffd966;
+    --love: #ff66aa;
+    --angry: #ff4d4d;
 }
 
 body, html {
     margin: 0; padding: 0;
-    background: #000; /* Глубокая черная коробка */
+    background: #000;
     width: 100vw; height: 100vh;
     overflow: hidden;
+    font-family: 'Courier New', monospace;
 }
 
 #box {
     position: relative;
     width: 100%; height: 100%;
-    display: flex; justify-content: center; align-items: center;
 }
 
 #pet-face {
     position: absolute;
     width: 280px;
     display: flex; flex-direction: column; align-items: center;
-    /* Центрирование при старте */
+    /* Стартовая позиция в центре */
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
-    transition: left 1.5s ease-in-out, top 1.5s ease-in-out, transform 0.3s;
-    cursor: pointer;
+    transition: left 1.2s ease-in-out, top 1.2s ease-in-out;
 }
 
 .ears { display: flex; gap: 70px; margin-bottom: -15px; }
 .ear {
     width: 75px; height: 95px;
-    background: #000; border: 3px solid var(--cyan);
+    background: #000; border: 3px solid var(--led);
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    border-radius: 12px;
-    box-shadow: 0 0 15px var(--cyan);
+    border-radius: 12px; box-shadow: 0 0 15px var(--led);
 }
 
-.eyes-row { display: flex; gap: 40px; }
+.eyes-row { display: flex; gap: 45px; }
 .eye {
-    width: 70px; height: 115px;
-    background: var(--cyan);
+    width: 70px; height: 110px;
+    background: var(--led);
     border-radius: 50% 50% 45% 45%;
-    box-shadow: 0 0 35px var(--cyan);
+    box-shadow: 0 0 30px var(--led);
     transition: all 0.3s ease;
 }
 
 .nose {
-    width: 16px; height: 11px;
-    background: var(--cyan);
-    border-radius: 50%;
-    margin: 15px 0 5px;
-    box-shadow: 0 0 10px var(--cyan);
+    width: 16px; height: 10px;
+    background: var(--led);
+    border-radius: 50%; margin: 15px 0 5px;
 }
 
 .mouth {
-    width: 50px; height: 18px;
-    border-bottom: 4px solid var(--cyan);
-    border-radius: 0 0 25px 25px;
+    width: 45px; height: 15px;
+    border-bottom: 4px solid var(--led);
+    border-radius: 0 0 20px 20px;
 }
 
-#subtitles {
-    position: absolute; bottom: 40px; width: 100%;
+#status-text {
+    position: absolute; bottom: 30px; width: 100%;
     text-align: center; color: rgba(0, 242, 255, 0.4);
-    font-family: monospace; font-size: 15px;
-    pointer-events: none;
+    font-size: 14px; pointer-events: none;
 }
 
 /* Эмоции */
-.eye.scared { transform: scale(0.5); background: var(--yellow); box-shadow: 0 0 20px var(--yellow); }
-.eye.love { background: var(--pink); box-shadow: 0 0 35px var(--pink); transform: scale(1.15); }
-.eye.angry { background: var(--red); box-shadow: 0 0 35px var(--red); clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 60%); }
+.eye.scared { transform: scale(0.6); background: var(--scared); box-shadow: 0 0 20px var(--scared); }
+.eye.love { background: var(--love); box-shadow: 0 0 30px var(--love); transform: scale(1.1); }
+.eye.angry { background: var(--angry); box-shadow: 0 0 30px var(--angry); clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 60%); }
 .eye.blink { transform: scaleY(0.05); }

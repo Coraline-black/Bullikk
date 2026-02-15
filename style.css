@@ -1,249 +1,177 @@
 :root {
-  --bg-color: #050505;
-  --robot-shell: linear-gradient(145deg, #2c2c2e, #1a1a1b);
-  --screen-bg: #000000;
-  --cyan: #00f2ff;
-  --cyan-glow: rgba(0, 242, 255, 0.5);
-  --pink: #ff3366;
-  --pink-glow: rgba(255, 51, 102, 0.5);
-  --yellow: #ffd966;
-  --danger: #ff4d4d;
+    --bg-dark: #050505;
+    --robot-shell: linear-gradient(145deg, #2a2a2a, #121212);
+    --led-cyan: #00f2ff;
+    --led-glow: rgba(0, 242, 255, 0.4);
+    --led-love: #ff3366;
+    --led-angry: #ff4d4d;
+    --glass: rgba(255, 255, 255, 0.03);
+    --border-glass: rgba(255, 255, 255, 0.08);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent;
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body { 
+    background: var(--bg-dark); 
+    margin: 0; 
+    height: 100vh; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    overflow: hidden;
 }
 
-body {
-  background: var(--bg-color);
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Segoe UI', system-ui, sans-serif;
-  overflow: hidden;
-}
-
-.scene {
-  width: 100%;
-  max-width: 400px;
-  height: 90vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-}
-
-/* СТАТИСТИКА */
-.bio-stats {
-  width: 100%;
-  display: flex;
-  justify-content: space-around;
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* КОРПУС РОБОТА */
+/* ЭФФЕКТ ГЛУБИНЫ КОРПУСА */
 .robot-container {
-  position: relative;
-  width: 280px;
-  height: 220px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: breathing 4s ease-in-out infinite;
+    position: relative;
+    width: 320px;
+    height: 280px;
+    background: var(--robot-shell);
+    border-radius: 70px 70px 60px 60px;
+    padding: 15px;
+    box-shadow: 
+        0 20px 50px rgba(0,0,0,0.8),
+        inset 0 2px 5px rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-@keyframes breathing {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-}
-
-/* УШКИ КАК НА ФОТО */
+/* УШКИ С ГРАДИЕНТОМ */
 .ears {
-  position: absolute;
-  top: -20px;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 15px;
-  z-index: -1;
+    position: absolute;
+    top: -35px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 30px;
 }
 
 .ear {
-  width: 75px;
-  height: 90px;
-  background: #2c2c2e;
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  border-radius: 12px;
+    width: 80px;
+    height: 100px;
+    background: var(--robot-shell);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    border-radius: 15px;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
 }
 
-/* ГОЛОВА */
-#robot-head {
-  width: 100%;
-  height: 100%;
-  background: var(--robot-shell);
-  border-radius: 65px 65px 50px 50px;
-  padding: 12px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.1);
-  border: 1px solid #333;
-}
-
+/* ЭКРАН (ЛИЦО) */
 #face {
-  width: 100%;
-  height: 100%;
-  background: var(--screen-bg);
-  border-radius: 50px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  position: relative;
-  overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #111 0%, #000 100%);
+    border-radius: 55px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    border: 1px solid var(--border-glass);
+    position: relative;
+    overflow: hidden;
 }
 
-/* ГЛАЗА */
-.eyes-row {
-  display: flex;
-  gap: 45px;
-  align-items: center;
+/* БЛИК НА СТЕКЛЕ ЭКРАНА */
+#face::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.03) 50%, transparent 55%);
+    pointer-events: none;
 }
+
+/* ГЛАЗА С ЭФФЕКТОМ СВЕЧЕНИЯ (BLOOM) */
+.eyes-row { display: flex; gap: 45px; }
 
 .eye {
-  width: 50px;
-  height: 50px;
-  background: var(--cyan);
-  border-radius: 50%;
-  box-shadow: 0 0 20px var(--cyan-glow);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 65px;
+    height: 95px;
+    background: var(--led-cyan);
+    border-radius: 50% 50% 48% 48%;
+    filter: blur(0.5px);
+    box-shadow: 
+        0 0 20px var(--led-glow),
+        0 0 40px var(--led-glow),
+        inset 0 0 15px rgba(255,255,255,0.8);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
 }
 
-/* ЭМОЦИИ ГЛАЗ */
-.eye.love {
-  background: var(--pink);
-  box-shadow: 0 0 25px var(--pink-glow);
-  clip-path: path('M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
-  transform: scale(2.2); /* Увеличиваем, чтобы сердечки были заметны */
+/* Зрачок (эффект линзы) */
+.eye::before {
+    content: '';
+    position: absolute;
+    top: 15%; left: 20%;
+    width: 30%; height: 20%;
+    background: rgba(255,255,255,0.6);
+    border-radius: 50%;
+    filter: blur(2px);
 }
 
-.eye.angry {
-  background: var(--danger);
-  height: 15px;
-  border-radius: 2px;
-  transform: rotate(15deg);
-}
-.eye.angry.left-eye { transform: rotate(-15deg); }
-
-.eye.sleep {
-  height: 4px;
-  width: 40px;
-  background: #1a3a5a;
-  box-shadow: none;
+/* НОС И РОТ */
+.mouth-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
-.eye.hunt {
-  width: 65px;
-  height: 65px;
-  background: #fff;
-  box-shadow: 0 0 35px #fff;
+.nose {
+    width: 14px;
+    height: 8px;
+    background: var(--led-cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--led-glow);
 }
 
-/* РОТ */
 .cat-mouth {
-  width: 35px;
-  height: 12px;
-  border-bottom: 4px solid var(--cyan);
-  border-radius: 0 0 25px 25px;
-  opacity: 0.8;
+    width: 45px;
+    height: 18px;
+    border-bottom: 5px solid var(--led-cyan);
+    border-radius: 0 0 30px 30px;
+    filter: drop-shadow(0 0 8px var(--led-glow));
 }
 
-/* ТЕКСТОВЫЙ ПЛАНШЕТ */
+/* ТЕКСТОВОЕ ОБЛАКО (GLASSMORPHISM) */
 #tablet {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 24px;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  min-height: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: absolute;
+    bottom: 40px;
+    width: 340px;
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border-glass);
+    padding: 20px;
+    border-radius: 30px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    font-size: 15px;
+    line-height: 1.4;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
-.text-content {
-  font-size: 15px;
-  line-height: 1.4;
-  color: #ddd;
-  text-align: center;
-}
-
-/* КНОПКИ И ВВОД */
-.controls {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  align-items: center;
-}
-
-.input-group {
-  width: 100%;
-  display: flex;
-  background: #1c1c1e;
-  border-radius: 30px;
-  padding: 6px 18px;
-  border: 1px solid #333;
-}
-
-#textInput {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: white;
-  padding: 10px;
-  outline: none;
-  font-size: 16px;
-}
-
-#sendBtn {
-  background: none;
-  border: none;
-  color: var(--cyan);
-  font-size: 20px;
-  cursor: pointer;
-}
-
+/* КНОПКА МИКРОФОНА (NEUMORPHISM) */
 #micBtn {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: none;
-  background: #fff;
-  font-size: 28px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-  cursor: pointer;
-  transition: 0.2s;
+    position: absolute;
+    bottom: -90px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0,242,255,0.3);
+    transition: 0.3s;
 }
 
 #micBtn:active { transform: scale(0.9); }
 
-/* АНИМАЦИЯ БЕШЕНСТВА (ZOOMIES) */
-.active-zoomies {
-  animation: zoomies 0.2s infinite;
+/* АНИМАЦИЯ ДЫХАНИЯ */
+@keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.02); opacity: 1; }
 }
-
-@keyframes zoomies {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(15px, -15px); }
-  50% { transform: translate(-15px, 15px); }
-  75% { transform: translate(15px, 15px); }
-  100% { transform: translate(0, 0); }
-}
+.robot-container { animation: breathe 4s ease-in-out infinite; }

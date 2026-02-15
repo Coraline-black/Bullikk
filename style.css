@@ -2,71 +2,79 @@
     --cyan: #00f2ff;
     --pink: #ff66aa;
     --yellow: #ffd966;
-    --red: #ff4d4d;
 }
 
 body, html {
     margin: 0; padding: 0;
-    background: #000; /* Черная коробка */
+    background: #000;
     width: 100vw; height: 100vh;
     overflow: hidden;
-    font-family: 'Courier New', monospace;
+    font-family: sans-serif;
 }
 
-#glass-box {
-    position: relative; width: 100%; height: 100%;
+#app {
+    position: relative;
+    width: 100%; height: 100%;
     display: flex; justify-content: center; align-items: center;
 }
 
-#bullik {
+#pet {
     position: absolute;
-    width: 280px;
+    width: 260px;
     display: flex; flex-direction: column; align-items: center;
-    /* Стартовая точка - центр */
+    /* Стартовая позиция ровно по центру */
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
-    transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1), 
-                top 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: left 0.8s ease-out, top 0.8s ease-out;
     cursor: pointer;
 }
 
-.ears-container { display: flex; gap: 80px; margin-bottom: -15px; }
+.ears { display: flex; gap: 70px; margin-bottom: -10px; }
 .ear {
-    width: 70px; height: 95px;
+    width: 70px; height: 90px;
     background: #000; border: 3px solid var(--cyan);
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    border-radius: 10px; box-shadow: 0 0 15px var(--cyan);
+    border-radius: 10px;
+    box-shadow: 0 0 15px var(--cyan);
 }
 
-.eyes-box { display: flex; gap: 40px; }
+.face { display: flex; flex-direction: column; align-items: center; }
+.eyes { display: flex; gap: 40px; }
 .eye {
-    width: 70px; height: 115px;
+    width: 65px; height: 105px;
     background: var(--cyan);
     border-radius: 50% 50% 45% 45%;
-    box-shadow: 0 0 35px var(--cyan);
-    transition: all 0.3s ease;
+    box-shadow: 0 0 30px var(--cyan);
+    transition: 0.2s;
 }
 
 .nose {
-    width: 16px; height: 10px;
+    width: 14px; height: 10px;
     background: var(--cyan);
-    border-radius: 50%; margin: 20px 0 5px;
+    border-radius: 50%; margin: 15px 0 5px;
 }
 
 .mouth {
-    width: 50px; height: 18px;
+    width: 45px; height: 12px;
     border-bottom: 4px solid var(--cyan);
-    border-radius: 0 0 25px 25px;
+    border-radius: 0 0 20px 20px;
 }
 
-#status-log {
-    position: absolute; bottom: 30px; width: 100%;
+/* Статусы */
+#overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); color: var(--cyan);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 100; cursor: pointer;
+}
+
+#logger {
+    position: fixed; bottom: 10px; width: 100%;
     text-align: center; color: rgba(0, 242, 255, 0.4);
-    font-size: 14px; pointer-events: none;
+    font-size: 12px; pointer-events: none;
 }
 
-/* ЭМОЦИИ */
-.eye.scared { transform: scale(0.6); background: var(--yellow); box-shadow: 0 0 20px var(--yellow); }
-.eye.love { background: var(--pink); box-shadow: 0 0 35px var(--pink); transform: scale(1.1); }
-.eye.angry { background: var(--red); box-shadow: 0 0 30px var(--red); clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 60%); }
-.eye.blink { transform: scaleY(0.05); }
+/* Эмоции */
+.scared { transform: scale(0.6); background: var(--yellow) !important; box-shadow: 0 0 20px var(--yellow) !important; }
+.love { transform: scale(1.1); background: var(--pink) !important; box-shadow: 0 0 35px var(--pink) !important; }
+.blink { transform: scaleY(0.05); }

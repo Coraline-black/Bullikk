@@ -1,88 +1,92 @@
-const pet = document.getElementById('pet');
+const pet = document.getElementById('pet-box');
 const eyes = document.querySelectorAll('.eye');
-const video = document.getElementById('video');
-const logger = document.getElementById('logger');
-const overlay = document.getElementById('overlay');
+const video = document.getElementById('webcam'); // Предполагаем наличие в HTML
 
-let isLive = false;
-const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
+// Настройки твоего Cloudflare
+const CF_ID = "ТВОЙ_ACCOUNT_ID"; 
+const CF_TOKEN = "ТВОЙ_API_TOKEN";
 
-// 1. Активация по клику (нужно для политик браузера)
-overlay.addEventListener('click', async () => {
-    overlay.style.display = 'none';
-    logger.textContent = "Загрузка ИИ...";
-    await initBullik();
-});
+let stats = {
+    isOwner: false,
+    mood: 'idle',
+    isThinking: false
+};
 
-async function initBullik() {
+// 1. Инициализация при загрузке
+window.onload = () => {
+    console.log("Буллик готов к пробуждению в центре.");
+    // Начинаем слежение через 3 секунды
+    setTimeout(startHybridAI, 3000);
+};
+
+// 2. Интеграция с Cloudflare Workers AI
+async function askAI(message) {
+    stats.isThinking = true;
     try {
-        // Загружаем только необходимую модель
-        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-        
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "user" }, 
-            audio: true 
+        const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CF_ID}/ai/run/@cf/meta/llama-3-8b-instruct`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${CF_TOKEN}` },
+            body: JSON.stringify({ 
+                prompt: `Ты — Буллик, гибрид собаки и кота. Ты преданный как пес и независимый как кот. Отвечай коротко: ${message}` 
+            })
         });
-        video.srcObject = stream;
-        
-        logger.textContent = "Буллик проснулся и ждет...";
-        isLive = true;
-        
-        startVision();
-        startHearing();
+        const data = await response.json();
+        return data.result.response;
     } catch (err) {
-        logger.textContent = "Ошибка доступа: " + err.message;
-        console.error(err);
+        return "Мрр-гав? (Связь потеряна)";
+    } finally {
+        stats.isThinking = false;
     }
 }
 
-// 2. Зрение (Слежение)
-async function startVision() {
-    if (!isLive) return;
+// 3. Зрение и Движение (Собачья преданность)
+async function startHybridAI() {
+    // Подгрузка FaceAPI (предполагаем наличие библиотеки)
+    await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/vladmandic/face-api/master/model/');
+    
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
 
-    const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
-
-    if (detections) {
-        const box = detections.box;
-        // Переводим координаты камеры в координаты экрана
-        const x = (1 - (box.x + box.width / 2) / video.videoWidth) * window.innerWidth;
-        const y = (box.y + box.height / 2) / video.videoHeight * window.innerHeight;
-
-        pet.style.left = `${x}px`;
-        pet.style.top = `${y}px`;
+    setInterval(async () => {
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
         
-        setEmotion('idle');
-    } else {
-        // Если никого нет - медленный дрейф
-        if (Math.random() > 0.98) wander();
-    }
-    
-    requestAnimationFrame(startVision);
+        if (detections.length > 0) {
+            // Ведет себя как пес: следует за тобой
+            const box = detections[0].box;
+            const x = (box.x / video.videoWidth) * window.innerWidth;
+            const y = (box.y / video.videoHeight) * window.innerHeight;
+            
+            pet.style.left = `${x}px`;
+            pet.style.top = `${y}px`;
+            setMood('idle');
+        } else {
+            // Ведет себя как кот: уходит в "свои дела" (дрейф)
+            if (Math.random() > 0.9) wander();
+        }
+    }, 600);
 }
 
-// 3. Слух (Реакция на голос)
-function startHearing() {
-    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Speech) return;
-    
+// 4. Слух (Команды)
+function initHearing() {
+    const Speech = window.webkitSpeechRecognition || window.SpeechRecognition;
     const rec = new Speech();
     rec.lang = 'ru-RU';
-    rec.continuous = true;
-    rec.onresult = (e) => {
-        const text = e.results[e.results.length - 1][0].transcript.toLowerCase();
-        if (text.includes("привет") || text.includes("буллик")) {
-            setEmotion('love');
-            setTimeout(() => setEmotion('idle'), 3000);
+    rec.onresult = async (e) => {
+        const text = e.results[0][0].transcript.toLowerCase();
+        if (text.includes("буллик")) {
+            setMood('love');
+            const reply = await askAI(text);
+            console.log("Буллик говорит:", reply);
         }
     };
     rec.start();
 }
 
 // Помощники
-function setEmotion(type) {
+function setMood(m) {
     eyes.forEach(e => {
         e.className = 'eye';
-        if (type !== 'idle') e.classList.add(type);
+        if (m !== 'idle') e.classList.add(m);
     });
 }
 
@@ -93,15 +97,19 @@ function wander() {
     pet.style.top = `${ty}px`;
 }
 
+// Поглаживание (мурчание)
+pet.onclick = () => {
+    pet.classList.add('purring');
+    setMood('love');
+    if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+    setTimeout(() => {
+        pet.classList.remove('purring');
+        setMood('idle');
+    }, 2000);
+};
+
 // Моргание
 setInterval(() => {
     eyes.forEach(e => e.classList.add('blink'));
     setTimeout(() => eyes.forEach(e => e.classList.remove('blink')), 150);
 }, 4000);
-
-// Поглаживание
-pet.onclick = () => {
-    setEmotion('love');
-    if (navigator.vibrate) navigator.vibrate(50);
-    setTimeout(() => setEmotion('idle'), 2000);
-};

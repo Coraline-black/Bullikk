@@ -1,51 +1,249 @@
 :root {
-    --bg-color: #0d0d0f;
-    --robot-color: #1e1e1e;
-    --cyan: #00f2ff;
-    --eye-size: 45px;
+  --bg-color: #050505;
+  --robot-shell: linear-gradient(145deg, #2c2c2e, #1a1a1b);
+  --screen-bg: #000000;
+  --cyan: #00f2ff;
+  --cyan-glow: rgba(0, 242, 255, 0.5);
+  --pink: #ff3366;
+  --pink-glow: rgba(255, 51, 102, 0.5);
+  --yellow: #ffd966;
+  --danger: #ff4d4d;
 }
 
-body { background: var(--bg-color); color: white; font-family: 'Courier New', monospace; overflow: hidden; }
-
-.scene { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; justify-content: space-between; }
-
-/* Динамика тела */
-.robot-container { 
-    position: relative; 
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    cursor: pointer;
-    user-select: none;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Анимация "Бесится" (Zoomies) */
+body {
+  background: var(--bg-color);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.scene {
+  width: 100%;
+  max-width: 400px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
+
+/* СТАТИСТИКА */
+.bio-stats {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* КОРПУС РОБОТА */
+.robot-container {
+  position: relative;
+  width: 280px;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: breathing 4s ease-in-out infinite;
+}
+
+@keyframes breathing {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* УШКИ КАК НА ФОТО */
+.ears {
+  position: absolute;
+  top: -20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 15px;
+  z-index: -1;
+}
+
+.ear {
+  width: 75px;
+  height: 90px;
+  background: #2c2c2e;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  border-radius: 12px;
+}
+
+/* ГОЛОВА */
+#robot-head {
+  width: 100%;
+  height: 100%;
+  background: var(--robot-shell);
+  border-radius: 65px 65px 50px 50px;
+  padding: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.1);
+  border: 1px solid #333;
+}
+
+#face {
+  width: 100%;
+  height: 100%;
+  background: var(--screen-bg);
+  border-radius: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ГЛАЗА */
+.eyes-row {
+  display: flex;
+  gap: 45px;
+  align-items: center;
+}
+
+.eye {
+  width: 50px;
+  height: 50px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 20px var(--cyan-glow);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ЭМОЦИИ ГЛАЗ */
+.eye.love {
+  background: var(--pink);
+  box-shadow: 0 0 25px var(--pink-glow);
+  clip-path: path('M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+  transform: scale(2.2); /* Увеличиваем, чтобы сердечки были заметны */
+}
+
+.eye.angry {
+  background: var(--danger);
+  height: 15px;
+  border-radius: 2px;
+  transform: rotate(15deg);
+}
+.eye.angry.left-eye { transform: rotate(-15deg); }
+
+.eye.sleep {
+  height: 4px;
+  width: 40px;
+  background: #1a3a5a;
+  box-shadow: none;
+}
+
+.eye.hunt {
+  width: 65px;
+  height: 65px;
+  background: #fff;
+  box-shadow: 0 0 35px #fff;
+}
+
+/* РОТ */
+.cat-mouth {
+  width: 35px;
+  height: 12px;
+  border-bottom: 4px solid var(--cyan);
+  border-radius: 0 0 25px 25px;
+  opacity: 0.8;
+}
+
+/* ТЕКСТОВЫЙ ПЛАНШЕТ */
+#tablet {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-content {
+  font-size: 15px;
+  line-height: 1.4;
+  color: #ddd;
+  text-align: center;
+}
+
+/* КНОПКИ И ВВОД */
+.controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.input-group {
+  width: 100%;
+  display: flex;
+  background: #1c1c1e;
+  border-radius: 30px;
+  padding: 6px 18px;
+  border: 1px solid #333;
+}
+
+#textInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 10px;
+  outline: none;
+  font-size: 16px;
+}
+
+#sendBtn {
+  background: none;
+  border: none;
+  color: var(--cyan);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#micBtn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  font-size: 28px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#micBtn:active { transform: scale(0.9); }
+
+/* АНИМАЦИЯ БЕШЕНСТВА (ZOOMIES) */
+.active-zoomies {
+  animation: zoomies 0.2s infinite;
+}
+
 @keyframes zoomies {
-    0% { transform: translate(0,0) rotate(0); }
-    20% { transform: translate(50px, -20px) rotate(10deg); }
-    40% { transform: translate(-60px, 30px) rotate(-15deg); }
-    60% { transform: translate(70px, 100px) rotate(20deg); }
-    100% { transform: translate(0,0) rotate(0); }
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(15px, -15px); }
+  50% { transform: translate(-15px, 15px); }
+  75% { transform: translate(15px, 15px); }
+  100% { transform: translate(0, 0); }
 }
-
-.zoomies { animation: zoomies 0.4s infinite !important; }
-
-/* Лицо */
-#robot-head { width: 250px; height: 190px; background: var(--robot-color); border-radius: 50px; padding: 10px; border: 3px solid #333; }
-#face { width: 100%; height: 100%; background: #000; border-radius: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
-
-.eye { width: var(--eye-size); height: var(--eye-size); background: var(--cyan); border-radius: 50%; box-shadow: 0 0 20px var(--cyan); transition: 0.1s; }
-
-/* Зрачки расширяются при охоте/игре */
-.eye.hunt { width: 60px; height: 60px; background: #fff; box-shadow: 0 0 30px #fff; }
-
-/* Кусание экрана */
-.bite { transform: scale(1.5) rotate(5deg); filter: hue-rotate(90deg); }
-
-.cat-mouth { width: 30px; height: 10px; border-bottom: 3px solid var(--cyan); border-radius: 50%; transition: 0.3s; }
-
-#tablet { width: 90%; min-height: 60px; font-style: italic; color: #888; text-align: center; font-size: 14px; }
-
-.controls { width: 100%; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-.input-group { width: 100%; display: flex; background: #1a1a1b; border-radius: 30px; padding: 5px; border: 1px solid #333; }
-#textInput { flex: 1; background: none; border: none; color: white; padding: 12px; outline: none; }
-#micBtn { width: 60px; height: 60px; border-radius: 50%; border: none; background: #fff; font-size: 25px; transition: 0.3s; }
-#micBtn.active { background: #ff4d4d; transform: scale(1.2); }

@@ -1,67 +1,67 @@
-const bullik = document.getElementById('bullik');
+const pet = document.getElementById('pet');
 const eyes = document.querySelectorAll('.eye');
-const log = document.getElementById('status-log');
-const video = document.getElementById('webcam');
+const video = document.getElementById('video');
+const logger = document.getElementById('logger');
+const overlay = document.getElementById('overlay');
 
-let stats = { isOwner: false, trust: 0, active: false };
+let isLive = false;
+const MODEL_URL = 'https://raw.githubusercontent.com/vladmandic/face-api/master/model/';
 
-// 1. Инициализация систем
-window.onload = async () => {
+// 1. Активация по клику (нужно для политик браузера)
+overlay.addEventListener('click', async () => {
+    overlay.style.display = 'none';
+    logger.textContent = "Загрузка ИИ...";
+    await initBullik();
+});
+
+async function initBullik() {
     try {
-        // Подключаем модель для распознавания лиц
-        await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/vladmandic/face-api/master/model/');
+        // Загружаем только необходимую модель
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
         
-        // Доступ к камере и микрофону
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "user" }, 
+            audio: true 
+        });
         video.srcObject = stream;
         
-        log.textContent = "* Буллик проснулся. Калибровка... *";
+        logger.textContent = "Буллик проснулся и ждет...";
+        isLive = true;
         
-        // Активация жизни через 3 секунды пребывания в центре
-        setTimeout(() => {
-            stats.active = true;
-            runAI();
-            initHearing();
-        }, 3000);
+        startVision();
+        startHearing();
     } catch (err) {
-        log.textContent = "* Ошибка: Буллик не может видеть или слышать *";
+        logger.textContent = "Ошибка доступа: " + err.message;
+        console.error(err);
     }
-};
-
-// 2. Цикл Зрения
-async function runAI() {
-    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
-
-    if (detections.length > 0) {
-        const box = detections[0].box;
-        
-        if (!stats.isOwner) {
-            setMood('scared');
-            log.textContent = "* Буллик изучает незнакомца... *";
-            stats.trust++;
-            if (stats.trust > 40) { 
-                stats.isOwner = true; 
-                setMood('love');
-                log.textContent = "* Буллик привык к тебе! *";
-            }
-        } else {
-            setMood('idle');
-            log.textContent = "* Буллик наблюдает за тобой *";
-            // Слежение за лицом
-            const targetX = (box.x + box.width / 2) / video.videoWidth * window.innerWidth;
-            const targetY = (box.y + box.height / 2) / video.videoHeight * window.innerHeight;
-            bullik.style.left = `${targetX}px`;
-            bullik.style.top = `${targetY}px`;
-        }
-    } else {
-        log.textContent = "* Буллик скучает в коробке *";
-        if (Math.random() > 0.98) wander(); // Случайное перемещение
-    }
-    requestAnimationFrame(runAI);
 }
 
-// 3. Цикл Слуха
-function initHearing() {
+// 2. Зрение (Слежение)
+async function startVision() {
+    if (!isLive) return;
+
+    const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
+
+    if (detections) {
+        const box = detections.box;
+        // Переводим координаты камеры в координаты экрана
+        const x = (1 - (box.x + box.width / 2) / video.videoWidth) * window.innerWidth;
+        const y = (box.y + box.height / 2) / video.videoHeight * window.innerHeight;
+
+        pet.style.left = `${x}px`;
+        pet.style.top = `${y}px`;
+        
+        setEmotion('idle');
+    } else {
+        // Если никого нет - медленный дрейф
+        if (Math.random() > 0.98) wander();
+    }
+    
+    requestAnimationFrame(startVision);
+}
+
+// 3. Слух (Реакция на голос)
+function startHearing() {
     const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Speech) return;
     
@@ -70,41 +70,38 @@ function initHearing() {
     rec.continuous = true;
     rec.onresult = (e) => {
         const text = e.results[e.results.length - 1][0].transcript.toLowerCase();
-        if (text.includes("буллик") || text.includes("привет")) {
-            setMood('love');
-            log.textContent = "* услышал тебя! *";
-            if (navigator.vibrate) navigator.vibrate(100);
-            setTimeout(() => setMood('idle'), 3000);
+        if (text.includes("привет") || text.includes("буллик")) {
+            setEmotion('love');
+            setTimeout(() => setEmotion('idle'), 3000);
         }
     };
     rec.start();
 }
 
-// 4. Функции управления
-function setMood(m) {
+// Помощники
+function setEmotion(type) {
     eyes.forEach(e => {
         e.className = 'eye';
-        if (m !== 'idle') e.classList.add(m);
+        if (type !== 'idle') e.classList.add(type);
     });
 }
 
 function wander() {
-    const x = Math.random() * (window.innerWidth - 200) + 100;
-    const y = Math.random() * (window.innerHeight - 200) + 100;
-    bullik.style.left = `${x}px`;
-    bullik.style.top = `${y}px`;
+    const tx = Math.random() * (window.innerWidth - 200) + 100;
+    const ty = Math.random() * (window.innerHeight - 200) + 100;
+    pet.style.left = `${tx}px`;
+    pet.style.top = `${ty}px`;
 }
-
-// Поглаживание
-bullik.addEventListener('click', () => {
-    setMood('love');
-    log.textContent = "* мур-мур *";
-    if (navigator.vibrate) navigator.vibrate(50);
-    setTimeout(() => setMood('idle'), 2000);
-});
 
 // Моргание
 setInterval(() => {
     eyes.forEach(e => e.classList.add('blink'));
     setTimeout(() => eyes.forEach(e => e.classList.remove('blink')), 150);
-}, 5000);
+}, 4000);
+
+// Поглаживание
+pet.onclick = () => {
+    setEmotion('love');
+    if (navigator.vibrate) navigator.vibrate(50);
+    setTimeout(() => setEmotion('idle'), 2000);
+};

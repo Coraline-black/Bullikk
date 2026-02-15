@@ -1,131 +1,118 @@
-const face = document.getElementById('pet-face');
-const subs = document.getElementById('subtitles');
+const pet = document.getElementById('pet-container');
 const eyes = document.querySelectorAll('.eye');
+const status = document.getElementById('ai-status');
 const video = document.getElementById('webcam');
 
-let petStats = {
-    isOwnerRecognized: false,
-    patience: 0,
-    isFloating: false
+let state = {
+    isOwner: false,
+    trustPoints: 0,
+    isActive: false
 };
 
-// 1. Инициализация "Зрения"
-async function initAI() {
+// 1. Запуск зрения и микрофона
+window.onload = async () => {
     try {
-        // Загрузка модели распознавания
+        // Подгружаем нейросетевую модель
         await faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/vladmandic/face-api/master/model/');
         
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         video.srcObject = stream;
         
-        subs.textContent = "*Буллик осматривает коробку...*";
+        status.textContent = "* Буллик просыпается в центре коробки *";
         
-        // Начинаем видеть через 2 секунды после центрации
-        setTimeout(startLifeCycle, 2000);
+        // Ожидание калибровки в центре
+        setTimeout(() => {
+            state.isActive = true;
+            processAI();
+            initVoiceRecognition();
+        }, 3000);
     } catch (err) {
-        subs.textContent = "*Ошибка камеры. Буллик ничего не видит*";
+        status.textContent = "* Ошибка доступа к чувствам (камера/микрофон) *";
     }
-}
+};
 
-// 2. Основной цикл жизни
-async function startLifeCycle() {
-    detectFace();
-    initHearing();
-    
-    // Каждые 10 секунд он может захотеть переместиться, если никого не видит
-    setInterval(() => {
-        if (!petStats.isOwnerRecognized) floatAround();
-    }, 10000);
-}
-
-async function detectFace() {
+// 2. Цикл ИИ: Видеть и Следить
+async function processAI() {
     const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
-    
+
     if (detections.length > 0) {
-        if (!petStats.isOwnerRecognized) {
-            setEmotion('scared');
-            subs.textContent = "*Буллик боится незнакомца...*";
-            petStats.patience++;
-            
-            if (petStats.patience > 30) { // Привыкает через некоторое время
-                petStats.isOwnerRecognized = true;
-                setEmotion('love');
-                subs.textContent = "*Буллик узнал тебя и радуется!*";
+        const box = detections[0].box;
+        
+        if (!state.isOwner) {
+            updateEmotion('scared');
+            status.textContent = "* Буллик напуган незнакомцем... *";
+            state.trustPoints++;
+            if (state.trustPoints > 50) { // Привыкание
+                state.isOwner = true;
+                updateEmotion('love');
             }
         } else {
-            setEmotion('idle');
-            followUser(detections[0].box);
+            updateEmotion('idle');
+            status.textContent = "* Буллик видит тебя и спокоен *";
+            followFace(box);
         }
     } else {
-        petStats.isOwnerRecognized = false;
-        subs.textContent = "*Буллик один в тишине*";
+        status.textContent = "* Буллик дрейфует в одиночестве *";
+        if (Math.random() > 0.97) wanderAround();
     }
     
-    setTimeout(detectFace, 500);
+    requestAnimationFrame(processAI);
 }
 
-// 3. Слух (Микрофон)
-function initHearing() {
-    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Speech) return;
+// 3. Функция слежения
+function followFace(box) {
+    const x = ((box.x + box.width / 2) / video.videoWidth) * window.innerWidth;
+    const y = ((box.y + box.height / 2) / video.videoHeight) * window.innerHeight;
+    pet.style.left = `${x}px`;
+    pet.style.top = `${y}px`;
+}
+
+// 4. Функция случайного блуждания
+function wanderAround() {
+    const x = Math.random() * (window.innerWidth - 250) + 125;
+    const y = Math.random() * (window.innerHeight - 250) + 125;
+    pet.style.left = `${x}px`;
+    pet.style.top = `${y}px`;
+}
+
+// 5. Голосовые команды
+function initVoiceRecognition() {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) return;
     
-    const rec = new Speech();
+    const rec = new Recognition();
     rec.lang = 'ru-RU';
     rec.continuous = true;
-    
     rec.onresult = (e) => {
-        const text = e.results[e.results.length - 1][0].transcript.toLowerCase();
-        if (text.includes("привет") || text.includes("буллик")) {
-            setEmotion('love');
-            subs.textContent = "*услышал твой голос!*";
-            setTimeout(() => setEmotion('idle'), 3000);
+        const last = e.results.length - 1;
+        const text = e.results[last][0].transcript.toLowerCase();
+        
+        if (text.includes("буллик") || text.includes("привет")) {
+            updateEmotion('love');
+            status.textContent = "* услышал твое приветствие! *";
+            if (navigator.vibrate) navigator.vibrate(100);
         }
     };
     rec.start();
 }
 
-// 4. Движения и Эмоции
-function setEmotion(type) {
+function updateEmotion(emo) {
     eyes.forEach(e => {
         e.className = 'eye';
-        if (type !== 'idle') e.classList.add(type);
+        if (emo !== 'idle') e.classList.add(emo);
     });
 }
 
-function followUser(box) {
-    // Буллик плавно двигается за твоим лицом
-    const centerX = (box.x + box.width / 2) / video.videoWidth;
-    const centerY = (box.y + box.height / 2) / video.videoHeight;
-    
-    const targetX = centerX * window.innerWidth;
-    const targetY = centerY * window.innerHeight;
-    
-    face.style.left = targetX + 'px';
-    face.style.top = targetY + 'px';
-    face.style.transform = "translate(-50%, -50%)";
-}
+// Поглаживание по экрану
+pet.onclick = () => {
+    updateEmotion('love');
+    status.textContent = "* мурчит *";
+    if (navigator.vibrate) navigator.vibrate(60);
+    setTimeout(() => updateEmotion('idle'), 2000);
+};
 
-function floatAround() {
-    const x = Math.random() * (window.innerWidth - 300) + 150;
-    const y = Math.random() * (window.innerHeight - 300) + 150;
-    face.style.left = x + 'px';
-    face.style.top = y + 'px';
-    face.style.transform = "translate(-50%, -50%)";
-}
-
-// Моргание
+// Естественное моргание
 setInterval(() => {
     eyes.forEach(e => e.classList.add('blink'));
     setTimeout(() => eyes.forEach(e => e.classList.remove('blink')), 150);
 }, 5000);
-
-// Поглаживание по стеклу
-face.addEventListener('click', () => {
-    setEmotion('love');
-    subs.textContent = "*мур-мур*";
-    if (navigator.vibrate) navigator.vibrate(80);
-    setTimeout(() => setEmotion('idle'), 2000);
-});
-
-// Старт
-window.onload = initAI;

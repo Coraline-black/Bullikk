@@ -3,49 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bullik: Wild AI</title>
+    <title>Bullik: Sealed Pet</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="scene">
-    <div class="bio-stats">
-        <div class="stat">⚡ <span id="energy-val">100</span>%</div>
-        <div class="stat">🍖 <span id="hunger-val">0</span>%</div>
-        <div class="stat">🐾 <span id="wild-val">Home</span></div>
-    </div>
-
-    <div class="robot-container" id="pet-body">
+<div id="pet-face-container">
+    <div id="pet-face">
         <div class="ears">
             <div class="ear left"></div>
             <div class="ear right"></div>
         </div>
-        <div id="robot-head">
-            <div id="face">
-                <div class="eyes-row">
-                    <div class="eye left-eye"></div>
-                    <div class="eye right-eye"></div>
-                </div>
-                <div class="mouth-box">
-                    <div class="cat-mouth"></div>
-                </div>
+        <div class="face-elements">
+            <div class="eyes-row">
+                <div class="eye left-eye"></div>
+                <div class="eye right-eye"></div>
+            </div>
+            <div class="mouth-box">
+                <div class="cat-mouth"></div>
             </div>
         </div>
     </div>
-
-    <div id="tablet">
-        <div class="text-content">...</div>
-    </div>
-
-    <div class="controls">
-        <div class="input-group">
-            <input id="textInput" type="text" placeholder="Позвать..." autocomplete="off">
-            <button id="sendBtn">➤</button>
-        </div>
-        <button id="micBtn">🎤</button>
-    </div>
 </div>
 
+<div id="debug-info"></div> <video id="webcam-feed" autoplay playsinline style="display: none;"></video>
+<canvas id="face-canvas" style="display: none;"></canvas>
+
 <script src="script.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </body>
 </html>

@@ -1,11 +1,11 @@
 :root {
-    --cyan: #00f2ff;
-    --pink: #ff66aa;
+    --neon: #00f2ff;
+    --love-color: #ff66aa;
 }
 
 body, html {
     margin: 0; padding: 0;
-    background: #000;
+    background: #000; /* Глубокая черная коробка */
     width: 100vw; height: 100vh;
     overflow: hidden;
     font-family: 'Courier New', monospace;
@@ -16,64 +16,66 @@ body, html {
     width: 100%; height: 100%;
 }
 
-/* Стартовое положение: строго центр */
+/* Стартовое положение: Идеально в центре */
 #pet-box {
     position: absolute;
     width: 280px;
     left: 50%; top: 50%;
     transform: translate(-50%, -50%);
     display: flex; flex-direction: column; align-items: center;
-    transition: left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), 
-                top 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+    /* Плавное перемещение за хозяином */
+    transition: left 0.9s cubic-bezier(0.4, 0, 0.2, 1), 
+                top 0.9s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 10;
 }
 
-/* Ушки гибрида */
-.ears { display: flex; gap: 80px; margin-bottom: -15px; }
+/* Ушки гибрида (кошачья острота) */
+.ears { display: flex; gap: 85px; margin-bottom: -15px; }
 .ear {
-    width: 75px; height: 95px;
-    background: #000; border: 3px solid var(--cyan);
+    width: 70px; height: 95px;
+    background: #000; border: 3px solid var(--neon);
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     border-radius: 10px;
-    box-shadow: 0 0 15px var(--cyan);
+    box-shadow: 0 0 15px var(--neon);
 }
 
+/* Лицо */
 .eyes { display: flex; gap: 40px; }
 .eye {
-    width: 70px; height: 110px;
-    background: var(--cyan);
+    width: 72px; height: 112px;
+    background: var(--neon);
     border-radius: 50% 50% 45% 45%;
-    box-shadow: 0 0 35px var(--cyan);
-    transition: background 0.3s, transform 0.3s;
+    box-shadow: 0 0 30px var(--neon);
+    transition: 0.3s;
 }
 
 /* Собачий носик */
 .nose {
-    width: 18px; height: 12px;
-    background: var(--cyan);
+    width: 16px; height: 10px;
+    background: var(--neon);
     clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
-    margin: 15px 0 5px;
+    margin: 18px 0 6px;
 }
 
 .mouth {
     width: 45px; height: 15px;
-    border-bottom: 4px solid var(--cyan);
-    border-radius: 0 0 22px 22px;
+    border-bottom: 4px solid var(--neon);
+    border-radius: 0 0 20px 20px;
 }
 
-/* Эффекты состояний */
-.love .eye { background: var(--pink); box-shadow: 0 0 35px var(--pink); transform: scale(1.1); }
+/* Эффекты (моргание и любовь) */
 .blink .eye { transform: scaleY(0.05); }
+.love .eye { background: var(--love-color); box-shadow: 0 0 40px var(--love-color); transform: scale(1.1); }
 
 #overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); color: var(--cyan);
+    background: rgba(0,0,0,0.95); color: var(--neon);
     display: flex; justify-content: center; align-items: center;
-    z-index: 100; cursor: pointer; text-align: center;
+    z-index: 100; cursor: pointer; text-align: center; font-size: 1.2rem;
 }
 
-#status-log {
+#info-panel {
     position: fixed; bottom: 20px; width: 100%;
-    text-align: center; color: rgba(0, 242, 255, 0.3);
+    text-align: center; color: rgba(0, 242, 255, 0.4);
     font-size: 12px; pointer-events: none;
 }

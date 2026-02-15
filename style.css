@@ -1,146 +1,98 @@
-/* Обнуление отступов и установка черного фона */
-* {
-    box-sizing: border-box;
+:root {
+    --neon: #00f2ff;
+    --hybrid-love: #ff66aa;
+    --dark: #000;
 }
 
 body, html {
     margin: 0;
     padding: 0;
-    background-color: #000; /* Полностью черный экран */
+    background: var(--dark);
     width: 100vw;
     height: 100vh;
-    overflow: hidden; /* Чтобы не было полос прокрутки */
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* Контейнер всего питомца */
-#pet {
+#pet-box {
     position: absolute;
     width: 280px;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* Центрирование через координаты */
+    /* Стартовая позиция - центр */
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    /* Очень плавная анимация перемещения */
-    transition: left 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                top 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 99;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: left 1.2s cubic-bezier(0.3, 1.3, 0.5, 1), 
+                top 1.2s cubic-bezier(0.3, 1.3, 0.5, 1);
     cursor: pointer;
 }
 
-/* Ушки сверху */
+/* Ушки гибрида (кошачья острота + неоновый контур) */
 .ears {
     display: flex;
-    justify-content: space-between;
-    width: 220px;
-    margin-bottom: -15px; /* Накладываем уши чуть-чуть на лицо */
+    gap: 80px;
+    margin-bottom: -15px;
 }
 
 .ear {
     width: 75px;
     height: 95px;
-    background: #000;
-    border: 3px solid #00f2ff; /* Основной неоновый цвет */
+    background: #050505;
+    border: 3px solid var(--neon);
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+    border-radius: 10px;
+    box-shadow: 0 0 15px var(--neon);
 }
 
-/* Основная область лица (глаза, нос, рот) */
+/* Лицо */
 .face {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
 }
 
-/* Контейнер для глаз */
 .eyes {
     display: flex;
-    gap: 45px;
+    gap: 40px;
 }
 
 .eye {
-    width: 72px;
-    height: 112px;
-    background: #00f2ff;
-    border-radius: 50% 50% 45% 45%; /* Овальная форма как на фото */
-    box-shadow: 0 0 35px #00f2ff;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 70px;
+    height: 110px;
+    background: var(--neon);
+    border-radius: 50% 50% 45% 45%;
+    box-shadow: 0 0 35px var(--neon);
+    transition: 0.3s;
 }
 
-/* Носик */
+/* Собачий носик (треугольный) */
 .nose {
-    width: 16px;
-    height: 10px;
-    background: #00f2ff;
-    border-radius: 50%;
-    margin: 18px 0 8px 0;
-    box-shadow: 0 0 10px #00f2ff;
+    width: 18px;
+    height: 12px;
+    background: var(--neon);
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+    margin: 15px 0 5px;
 }
 
-/* Ротик */
 .mouth {
-    width: 48px;
+    width: 45px;
     height: 15px;
-    border-bottom: 4px solid #00f2ff;
-    border-radius: 0 0 25px 25px;
+    border-bottom: 4px solid var(--neon);
+    border-radius: 0 0 22px 22px;
 }
 
-/* --- СОСТОЯНИЯ ЭМОЦИЙ --- */
+/* Эмоции гибрида */
+.eye.love { background: var(--hybrid-love); box-shadow: 0 0 40px var(--hybrid-love); transform: scale(1.1); }
+.eye.blink { transform: scaleY(0.05); }
 
-/* Испуг (Желтый) */
-.scared {
-    background-color: #ffd966 !important;
-    box-shadow: 0 0 25px #ffd966 !important;
-    transform: scale(0.65);
+/* Эффект мурчания (вибрация) */
+@keyframes purr {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.02); }
+    100% { transform: translate(-50%, -50%) scale(1); }
 }
-
-/* Радость/Любовь (Розовый) */
-.love {
-    background-color: #ff66aa !important;
-    box-shadow: 0 0 40px #ff66aa !important;
-    transform: scale(1.1);
-}
-
-/* Моргание */
-.blink {
-    transform: scaleY(0.05);
-    background-color: #00f2ff;
-}
-
-/* --- ВСПОМОГАТЕЛЬНЫЕ ЭЛЕМЕНТЫ --- */
-
-#overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    color: #00f2ff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 1.2rem;
-    text-align: center;
-    z-index: 1000;
-    cursor: pointer;
-}
-
-#logger {
-    position: fixed;
-    bottom: 20px;
-    width: 100%;
-    text-align: center;
-    color: rgba(0, 242, 255, 0.4);
-    font-family: monospace;
-    font-size: 0.8rem;
-    pointer-events: none;
-    letter-spacing: 1px;
-}
+.purring { animation: purr 0.2s infinite; }
